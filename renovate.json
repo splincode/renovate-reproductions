@@ -1,4 +1,280 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>taiga-family/renovate-config"]
+  "extends": [":semanticCommitScopeDisabled"],
+  "baseBranches": ["main"],
+  "enabledManagers": ["npm", "github-actions"],
+  "fetchChangeLogs": "off",
+  "internalChecksFilter": "strict",
+  "prHourlyLimit": 0,
+  "branchConcurrentLimit": 0,
+  "prConcurrentLimit": 2,
+  "labels": ["renovate"],
+  "rebaseWhen": "behind-base-branch",
+  "automerge": false,
+  "recreateWhen": "always",
+  "repositoryCache": "enabled",
+  "platform": "github",
+  "autoApprove": true,
+  "separateMajorMinor": true,
+  "separateMinorPatch": false,
+  "dependencyDashboard": false,
+  "dependencyDashboardApproval": false,
+  "branchPrefix": "renovate/",
+  "timezone": "Europe/Moscow",
+  "commitMessageLowerCase": "auto",
+  "semanticCommits": "enabled",
+  "onboarding": false,
+  "allowCustomCrateRegistries": true,
+  "allowScripts": true,
+  "exposeAllEnv": true,
+  "requireConfig": "optional",
+  "digest": {
+    "enabled": false
+  },
+  "skipInstalls": true,
+  "pinDigests": false,
+  "cloneSubmodules": true,
+  "includePaths": ["./package.json", "**/package.json", "!node_modules/**"],
+  "suppressNotifications": ["configErrorIssue", "dependencyLookupWarnings"],
+  "prBodyTemplate": "{{{table}}}{{{notes}}}{{{changelogs}}}{{{controls}}}{{{footer}}}",
+  "prBodyColumns": ["Package", "Type", "Change"],
+  "allowPostUpgradeCommandTemplating": true,
+  "packageRules": [
+    {
+      "enabledManagers": ["npm"],
+      "matchPackageNames": [".*"],
+      "postUpgradeTasks": {
+        "commands": [
+          "rm -rf package-lock.json node_modules **/node_modules",
+          "ws=$(node -p '!!require(`./package.json`).workspaces') && npm i -ws=$ws --include-workspace-root=$ws --verbose && npm i -ws=$ws --include-workspace-root=$ws",
+          "git add . && npx lint-staged --allow-empty || true"
+        ],
+        "executionMode": "branch",
+        "fileFilters": ["package-lock.json"]
+      }
+    },
+    {
+      "matchDepTypes": ["devDependencies", "dependencies"],
+      "rangeStrategy": "pin"
+    },
+    {
+      "matchDepTypes": ["peerDependencies", "optionalDependencies"],
+      "rangeStrategy": "bump"
+    },
+    {
+      "groupName": "tiptap",
+      "matchPackageNames": ["/^@tiptap/.*/"]
+    },
+    {
+      "groupName": "maskito",
+      "matchPackageNames": ["/^@maskito/.*/"]
+    },
+    {
+      "groupName": "cspell",
+      "matchPackageNames": ["/^@cspell/.*/"]
+    },
+    {
+      "groupName": "prosemirror",
+      "matchPackageNames": ["/^prosemirror.*/"]
+    },
+    {
+      "groupName": "definitely typed",
+      "matchPackageNames": ["/^@types/.*/"]
+    },
+    {
+      "groupName": "prettier",
+      "matchPackageNames": ["/^prettier/", "/^@prettier/.*/", "/$^prettier-.*/"]
+    },
+    {
+      "groupName": "cypress",
+      "matchPackageNames": ["/^cypress/", "/^cy2/", "/^cypress-image-snapshot/"]
+    },
+    {
+      "groupName": "commitlint",
+      "matchPackageNames": ["/^@commitlint/.*/"]
+    },
+    {
+      "groupName": "tinkoff",
+      "matchPackageNames": ["/^@tinkoff/.*/"]
+    },
+    {
+      "groupName": "rollup",
+      "matchPackageNames": ["/^rollup.*/", "/@rollup/pluginutils/"]
+    },
+    {
+      "groupName": "swc",
+      "matchPackageNames": ["/^@swc.*/"]
+    },
+    {
+      "groupName": "stackblitz sdk",
+      "matchPackageNames": ["/^@stackblitz/.*/"]
+    },
+    {
+      "groupName": "babel",
+      "matchPackageNames": ["/^@babel/eslint-.*/", "/babel.*/"]
+    },
+    {
+      "groupName": "jest",
+      "matchPackageNames": ["/^jest.*/", "/^ts-jest$/", "/^jest-preset-angular$/"]
+    },
+    {
+      "groupName": "react",
+      "matchPackageNames": ["/^react.*/"]
+    },
+    {
+      "groupName": "vue",
+      "matchPackageNames": ["/^vue.*/"]
+    },
+    {
+      "groupName": "jasmine",
+      "matchPackageNames": ["/^jasmine.*/"]
+    },
+    {
+      "groupName": "GitHub Actions",
+      "matchPackageNames": ["/^actions/.*/"]
+    },
+    {
+      "groupName": "angular web APIs plugins",
+      "matchPackageNames": ["/^@ng-web-apis/.*/"]
+    },
+    {
+      "groupName": "eslint",
+      "matchPackageNames": [
+        "/^eslint.*/",
+        "/^@stylistic/.*/",
+        "/^@angular-eslint.*/",
+        "/^@typescript-eslint/.*/",
+        "/^@taiga-ui/eslint-plugin-experience$/"
+      ]
+    },
+    {
+      "groupName": "nx",
+      "matchPackageNames": ["/^@nx.*/", "/^nx$/"],
+      "postUpgradeTasks": {
+        "commands": [
+          "npm install nx@{{{currentVersion}}} @nx/workspace@{{{currentVersion}}} --force --no-save --no-audit --no-fund --ignore-scripts --loglevel silent",
+          "npx nx migrate {{{newVersion}}}",
+          "npx nx migrate --run-migrations --ifExists && rm -f migrations.json || true",
+          "npx nx repair || true",
+          "rm -rf package-lock.json node_modules **/node_modules",
+          "ws=$(node -p '!!require(`./package.json`).workspaces') && npm i -ws=$ws --include-workspace-root=$ws --verbose && npm i -ws=$ws --include-workspace-root=$ws",
+          "git add . && npx lint-staged --allow-empty || true"
+        ],
+        "executionMode": "branch",
+        "fileFilters": ["**/**"]
+      }
+    },
+    {
+      "groupName": "ng",
+      "matchPackageNames": [
+        "/^zone.js$/",
+        "/^@angular.*/",
+        "/^@angular-devkit.*/",
+        "/^@schematics.*/",
+        "/^typescript$/",
+        "/^ng-packagr$/",
+        "/^rxjs$/",
+        "!/^@angular-eslint.*/"
+      ],
+      "postUpgradeTasks": {
+        "commands": [
+          "npm install nx --force --no-save --no-audit --no-fund --ignore-scripts --loglevel silent",
+          "npx nx migrate @angular/core --from=@angular/core@{{{currentVersion}}} --to=@angular/core@{{{newVersion}}}",
+          "npx nx migrate @angular/cli --from=@angular/cli@{{{currentVersion}}} --to=@angular/cli@{{{newVersion}}}",
+          "npx nx migrate --run-migrations --ifExists && rm -f migrations.json || true",
+          "rm -rf package-lock.json node_modules **/node_modules",
+          "ws=$(node -p '!!require(`./package.json`).workspaces') && npm i -ws=$ws --include-workspace-root=$ws --verbose && npm i -ws=$ws --include-workspace-root=$ws",
+          "git add . && npx lint-staged --allow-empty || true"
+        ],
+        "executionMode": "branch",
+        "fileFilters": ["**/**"]
+      }
+    },
+    {
+      "groupName": "taiga-ui family dependencies",
+      "matchPackageNames": [
+        "/^@taiga-ui/.*/",
+        "!/^@taiga-ui/.*config$/",
+        "!@taiga-ui/syncer",
+        "!@taiga-ui/design-tokens",
+        "!@taiga-ui/eslint-plugin-experience"
+      ],
+      "postUpgradeTasks": {
+        "commands": [
+          "npm install nx --force --no-save --no-audit --no-fund --ignore-scripts --loglevel silent",
+          "npx nx migrate @taiga-ui/cdk --from=@taiga-ui/cdk@{{{lookup (split currentVersion '.') 0}}} --to=@taiga-ui/cdk@{{{lookup (split newVersion '.') 0}}} || true",
+          "npx nx migrate --run-migrations --ifExists && rm -f migrations.json || true",
+          "rm -rf package-lock.json node_modules **/node_modules",
+          "ws=$(node -p '!!require(`./package.json`).workspaces') && npm i -ws=$ws --include-workspace-root=$ws --verbose && npm i -ws=$ws --include-workspace-root=$ws",
+          "git add . && npx lint-staged --allow-empty || true"
+        ],
+        "executionMode": "branch",
+        "fileFilters": ["**/**"]
+      }
+    },
+    {
+      "groupName": "taiga-ui config-tools",
+      "matchPackageNames": [
+        "/^@taiga-ui/.*config$/",
+        "@taiga-ui/syncer",
+        "@taiga-ui/design-tokens",
+        "@taiga-ui/eslint-plugin-experience"
+      ]
+    },
+    {
+      "enabled": false,
+      "matchDepTypes": ["engines"]
+    },
+    {
+      "enabled": false,
+      "matchUpdateTypes": ["major", "minor"],
+      "matchPackageNames": ["/^typescript$/", "/^rxjs$/"]
+    },
+    {
+      "enabled": false,
+      "matchUpdateTypes": ["major"],
+      "matchPackageNames": [
+        "/^@angular.*/",
+        "/^@schematics.*/",
+        "/^@nguniversal.*/",
+        "/^ngx-highlightjs$/",
+        "/^ngx-markdown$/",
+        "/^ng-packagr/",
+        "/^eslint$/",
+        "/^glob$/"
+      ]
+    },
+    {
+      "enabled": false,
+      "matchDepTypes": ["peerDependencies", "optionalDependencies"],
+      "matchPackageNames": [
+        "/^libphonenumber-js$/",
+        "/^highlight.js$/",
+        "/^typescript$/",
+        "/^react$/",
+        "/^vue$/",
+        "/^zone.js$/",
+        "/^rxjs$/",
+        "/^@angular.*/",
+        "/^@schematics.*/",
+        "/^react.*/",
+        "/^vue.*/"
+      ]
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "additionalBranchPrefix": "renovate/dev-dependencies/",
+      "branchPrefix": ""
+    },
+    {
+      "matchDepTypes": ["dependencies"],
+      "additionalBranchPrefix": "renovate/dependencies/",
+      "branchPrefix": ""
+    },
+    {
+      "matchDepTypes": ["peerDependencies", "optionalDependencies"],
+      "additionalBranchPrefix": "renovate/peer-dependencies/",
+      "branchPrefix": ""
+    }
+  ]
 }
