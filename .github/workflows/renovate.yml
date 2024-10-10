@@ -1,0 +1,33 @@
+name: 🤖 Run renovate
+on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Override default log level'
+        required: false
+        type: choice
+        options:
+          - minor
+          - patch
+          - major
+
+jobs:
+  renovate:
+    runs-on: ubuntu-latest
+    env:
+      RENOVATE_CONFIG_FILE: default.json
+      LOG_LEVEL: ${{ inputs.logLevel || 'debug' }}
+      RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4.2.1
+      - uses: taiga-family/ci/actions/setup/variables@v1.93.2
+      - uses: taiga-family/ci/actions/setup/node@v1.93.2
+      - run: |
+          npx renovate \
+                --autodiscover=true \
+                --autodiscover-filter='splincode/renovate-reproductions' \
+                --allowed-post-upgrade-commands='.*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
